@@ -1,0 +1,18 @@
+﻿@model Phone
+
+@{
+    ViewData["Title"] = "Delete Phone";
+}
+
+<h2>Подтверждение удаления</h2>
+
+
+<form method="post" asp-action="ConfirmDelete" asp-route-id="@Model.Id">
+
+    <p>Вы действительно хотите удалить устройство @Model.Name ?</p>
+
+    <input type="submit" value="Да"> 
+
+    <a asp-action="Index" asp-controller="Phone">Нет</a>
+
+</form>

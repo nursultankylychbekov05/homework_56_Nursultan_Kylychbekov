@@ -1,0 +1,49 @@
+﻿@model WebApplication1.Models.Order
+
+@{
+    ViewData["Title"] = "Order Phone";
+}
+
+<h2>Оформление заказа</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        @if (Model.Phone != null)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Вы заказываете: @Model.Phone.Name</h5>
+                    <p class="card-text">Бренд: @Model.Phone.Company</p>
+                    <p class="card-text">Цена: <strong>@Model.Phone.Price$</strong></p>
+                </div>
+            </div>
+        }
+
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <input type="hidden" asp-for="PhoneId" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Ваше имя</label>
+                <input asp-for="Name" class="form-control" value="@User.Identity?.Name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label">Адрес доставки</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContactPhone" class="form-label">Номер телефона</label>
+                <input asp-for="ContactPhone" class="form-control" />
+                <span asp-validation-for="ContactPhone" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success">Подтвердить заказ</button>
+            <a asp-controller="Phone" asp-action="Index" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>

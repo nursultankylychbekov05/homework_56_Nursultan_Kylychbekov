@@ -1,0 +1,41 @@
+﻿@model WebApplication1.ViewModels.PhonesWithOrders
+
+@{
+    ViewData["Title"] = "Главная страница";
+}
+
+<div class="text-center my-4">
+    <h1 class="display-4">Магазин смартфонов</h1>
+    <p class="lead">Добро пожаловать в наш каталог устройств</p>
+</div>
+
+@if (Model?.Phones != null && Model.Phones.Any())
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var phone in Model.Phones)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(phone.ImageUrl))
+                    {
+                        <img src="@phone.ImageUrl" class="card-img-top p-3" alt="@phone.Name" style="height: 220px; object-fit: contain;">
+                    }
+                    else
+                    {
+                        <div class="bg-light text-center py-5 text-muted">Нет фото</div>
+                    }
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@phone.Name</h5>
+                        <p class="card-text text-muted mb-1">@phone.Company</p>
+                        <p class="card-text text-primary fw-bold fs-5 mb-3">$@phone.Price</p>
+                        <a asp-controller="Phone" asp-action="Details" asp-route-id="@phone.Id" class="btn btn-outline-primary mt-auto">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center">Смартфоны пока не добавлены.</div>
+}

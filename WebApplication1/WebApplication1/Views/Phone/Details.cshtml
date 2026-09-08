@@ -1,0 +1,147 @@
+@model WebApplication1.Models.Phone
+
+@{
+    ViewData["Title"] = "Детали смартфона";
+    var currencies = ViewBag.Currencies as List<WebApplication1.Models.CurrencyRate>;
+    
+    double averageRating = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+    
+    var newReview = ViewBag.NewReview as WebApplication1.Models.Review ?? new WebApplication1.Models.Review { PhoneId = Model.Id };
+}
+
+<h1>Детали смартфона</h1>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="img-fluid rounded border shadow-sm" alt="@Model.Name" />
+            }
+            else
+            {
+                <div class="p-3 bg-light text-muted border text-center">Изображение отсутствует</div>
+            }
+        </div>
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-4">Название</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+
+                <dt class="col-sm-4">Производитель</dt>
+                <dd class="col-sm-8">@Model.Company</dd>
+
+                <dt class="col-sm-4">Базовая цена ($)</dt>
+                <dd class="col-sm-8">$@Model.Price</dd>
+
+                <dt class="col-sm-4">Описание</dt>
+                <dd class="col-sm-8">@Model.Description</dd>
+
+                <dt class="col-sm-4">Средняя оценка</dt>
+                <dd class="col-sm-8 fw-bold text-warning fs-5">
+                    ★ @averageRating.ToString("F1") / 5.0 
+                    <span class="text-muted fs-6 fw-normal">(@Model.Reviews.Count отзывов)</span>
+                </dd>
+            </dl>
+
+            <h5 class="mt-4">Стоимость в других валютах:</h5>
+            <ul class="list-group col-md-10 mb-4">
+                @if (currencies != null && currencies.Any())
+                {
+                    @foreach (var curr in currencies)
+                    {
+                        double convertedPrice = Model.Price * curr.CurrencyRateValue;
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@curr.CurrencyName (@curr.CurrencyCode)</span>
+                            <strong>@convertedPrice.ToString("N2") @curr.CurrencyCode</strong>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <h4>Оставить отзыв</h4>
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-action="AddReview" method="post">
+                <input type="hidden" name="PhoneId" value="@Model.Id" />
+                
+                <input type="hidden" name="AuthorName" value="@User.Identity.Name" />
+
+                <div class="mb-3">
+                    <label class="form-label">Ваше имя</label>
+                    <input class="form-control" value="@User.Identity.Name" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Оценка</label>
+                    <select name="Rating" class="form-select">
+                        @for (int i = 0; i <= 5; i++)
+                        {
+                            <option value="@i" selected="@(newReview.Rating == i)">@i</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Текст отзыва</label>
+                    <textarea name="Text" class="form-control" rows="3">@newReview.Text</textarea>
+                    <span class="text-danger">@Html.ValidationMessage("Text")</span>
+                </div>
+
+                <button type="submit" class="btn btn-success">Отправить отзыв</button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Чтобы оставить отзыв, пожалуйста, <a asp-controller="Account" asp-action="Login">войдите</a> в систему.
+            </div>
+        }
+    </div>
+
+    <div class="col-md-6">
+        <h4>Отзывы покупателей</h4>
+        @if (Model.Reviews.Any())
+        {
+            <div class="list-group">
+                @foreach (var rev in Model.Reviews)
+                {
+                    <div class="list-group-item mb-2 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold">@rev.AuthorName</h6>
+                            <small class="text-warning fw-bold">★ @rev.Rating / 5</small>
+                        </div>
+                        <p class="mb-1">@rev.Text</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Пока нет отзывов. Будьте первым!</p>
+        }
+    </div>
+</div>
+
+<div class="mt-4">
+    @if (User.IsInRole("admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Редактировать</a> <text>|</text>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
